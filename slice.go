@@ -11,13 +11,14 @@ var Slice SliceUtils
 
 // Merges the entire elements of a slice into a string and returns it.
 // If the slice is nil, return empty string.
-func (dummyReceiver *SliceUtils) ToString(sliceOfStrings []string) (mergedValue string) {
+// If separator is not the empty string, inserts whatever it's passed between the elements when merging
+func (dummyReceiver *SliceUtils) ToString(sliceOfStrings []string, separator string) (mergedValue string) {
 
 	if sliceOfStrings == nil {
 		return ""
 	}
 
-	mergedValue = strings.Join(sliceOfStrings, "")
+	mergedValue = strings.Join(sliceOfStrings, separator)
 
 	return mergedValue
 
