@@ -7,9 +7,14 @@ const (
 	comparisonTimeFormat = "2006-01-02 15:04:05 MST"
 )
 
+type dateUtils struct{}
+
+// single variable acting as the DateUtils "subpackage" inside the legit utils package
+var Date dateUtils
+
 // Returns true if secondDateTimeString is after the firstDateTimeString.
 // Both dates must be in this format: "YYYY-MM-DD HH:MM:SS" (e.g. 2014-12-22 18:24:43)
-func DateIsSecondAfterFirst(firstDateTimeString, secondDateTimeString string) (bool, error) {
+func (dummyReceiver *dateUtils) IsSecondAfterFirst(firstDateTimeString, secondDateTimeString string) (bool, error) {
 
 	if parsedFirstDate, err := time.Parse(comparisonTimeFormat, firstDateTimeString); err == nil {
 
@@ -36,7 +41,7 @@ func DateIsSecondAfterFirst(firstDateTimeString, secondDateTimeString string) (b
 }
 
 // Supplied date must be in this format: "YYYY-MM-DD HH:MM:SS" (e.g. 2014-12-22 18:24:43)
-func DateIsNowAfter(dateTimeString string) (bool, error) {
+func (dummyReceiver *dateUtils) IsNowAfter(dateTimeString string) (bool, error) {
 
 	if dateTimeParsed, err := time.Parse(comparisonTimeFormat, dateTimeString); err == nil {
 

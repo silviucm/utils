@@ -3,13 +3,13 @@ package utils
 import "os"
 import "io"
 
-type FileUtils struct{}
+type fileUtils struct{}
 
 // single variable acting as the FileUtils "subpackage" inside the legit utils package
-var File FileUtils
+var File fileUtils
 
 // Checks if the file with the given path exists, returns true if yes
-func (dummyReceiver *FileUtils) Exists(name string) bool {
+func (dummyReceiver *fileUtils) Exists(name string) bool {
 
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
@@ -19,7 +19,7 @@ func (dummyReceiver *FileUtils) Exists(name string) bool {
 	return true
 }
 
-func (dummyReceiver *FileUtils) Delete(filePath string) error {
+func (dummyReceiver *fileUtils) Delete(filePath string) error {
 
 	return os.Remove(filePath)
 
@@ -35,7 +35,7 @@ func (dummyReceiver *FileUtils) Delete(filePath string) error {
 //
 // In some scenarios, it is possible the file was closed before the defer statement
 // This function insures that an error is still captured in that case
-func (dummyReceiver *FileUtils) CheckClose(c io.Closer, err *error) {
+func (dummyReceiver *fileUtils) CheckClose(c io.Closer, err *error) {
 	cerr := c.Close()
 	if *err == nil {
 		*err = cerr
