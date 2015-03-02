@@ -1,14 +1,22 @@
 package utils
 
-import "strings"
+import (
+	"bytes"
+	"regexp"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+)
 
-type StringUtils struct{}
+type stringUtils struct{}
 
 // single variable acting as the StringUtils "subpackage" inside the legit utils package
-var String StringUtils
+var String stringUtils
+
+var camelCaseRegularExpression = regexp.MustCompile("[0-9A-Za-z]+")
 
 // If the given string is empty, offer an alternative to return in its stead
-func (dummyReceiver *StringUtils) EmptyAlternative(valueToReturnIfNotEmpty, valueToReturnIfOriginalEmpty string) string {
+func (dummyReceiver *stringUtils) EmptyAlternative(valueToReturnIfNotEmpty, valueToReturnIfOriginalEmpty string) string {
 
 	if valueToReturnIfNotEmpty == "" {
 		return valueToReturnIfOriginalEmpty
@@ -18,14 +26,39 @@ func (dummyReceiver *StringUtils) EmptyAlternative(valueToReturnIfNotEmpty, valu
 
 }
 
-func (dummyReceiver *StringUtils) Contains(parentString string, stringContainedInParent string) bool {
+func (dummyReceiver *stringUtils) Contains(parentString string, stringContainedInParent string) bool {
 
 	return strings.Contains(parentString, stringContainedInParent)
 
 }
 
-func (dummyReceiver *StringUtils) ReplaceAll(parentString string, oldString string, newString string) string {
+func (dummyReceiver *stringUtils) ReplaceAll(parentString string, oldString string, newString string) string {
 
 	return strings.Replace(parentString, oldString, newString, -1)
 
+}
+
+func (dummyReceiver *stringUtils) CamelCase(original string) string {
+
+	if original == "" {
+		return ""
+	}
+
+	sections := camelCaseRegularExpression.FindAll([]byte(original), -1)
+	for i, v := range sections {
+		sections[i] = bytes.Title(v)
+	}
+
+	// while returning, make sure to lower the first character
+	return dummyReceiver.LowerFirstChar(string(bytes.Join(sections, nil)))
+
+}
+
+func (dummyReceiver *stringUtils) LowerFirstChar(original string) string {
+
+	if original == "" {
+		return ""
+	}
+	r, n := utf8.DecodeRuneInString(original)
+	return string(unicode.ToLower(r)) + original[n:]
 }
