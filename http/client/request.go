@@ -88,6 +88,20 @@ func SendRequest(url string, requestType string,
 	return body, nil
 }
 
+// IsTimeoutError returns true if the provided error argument is a standard library
+// http error with the Timeout property set to true.
+func IsTimeoutError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if httpErr, ok := err.(interface {
+		Timeout() bool
+	}); ok {
+		return httpErr.Timeout()
+	}
+	return false
+}
+
 // ConvertMapToRequestParams accepts a map of strings representing the form parameters,
 // and constructs a url-encoded string to be used with both GET or POST http requests.
 // For POST requests in particular, it might make sense to set the Content-Type header
