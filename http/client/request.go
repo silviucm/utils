@@ -3,6 +3,8 @@ package client
 import (
 	"bytes"
 	"crypto/tls"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -27,6 +29,35 @@ func SendRequest(url string, requestType string,
 	headers map[string]string,
 	parameters map[string]string,
 	options ...RequestOptions) ([]byte, error) {
+
+	content, _, err := sendRequest(nil, url, requestType, headers, parameters, options...)
+	return content, err
+}
+
+// SendRequestToWriter connects to the url using a request with the specified type, headers and parameters.
+// The content is then written to the specified io.Writer indicated by destination.
+// The method returns the number of bytes written, and an error, if applicable.
+//
+// The options argument is not mandatory. If not present, the client and tls options are set as follows:
+// InsecureSkipVerify: false
+// ClientTimeout: client.DEFAULT_REQUEST_TIMEOUT_SECONDS
+func SendRequestToWriter(destination io.Writer, url string, requestType string,
+	headers map[string]string,
+	parameters map[string]string,
+	options ...RequestOptions) (int64, error) {
+
+	if destination == nil {
+		return 0, fmt.Errorf("SendRequestToWriter: the provided destination io.Writer is nil")
+	}
+
+	_, written, err := sendRequest(destination, url, requestType, headers, parameters, options...)
+	return written, err
+}
+
+func sendRequest(destination io.Writer, url string, requestType string,
+	headers map[string]string,
+	parameters map[string]string,
+	options ...RequestOptions) ([]byte, int64, error) {
 
 	defaultOptions := RequestOptions{
 		InsecureSkipVerify: DO_NOT_ALLOW_INSECURE_HTTPS,
@@ -57,14 +88,14 @@ func SendRequest(url string, requestType string,
 		request, err = http.NewRequest(requestType,
 			strings.Join([]string{url, ConvertMapToRequestParams(parameters, requestType)}, ""), nil)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 	} else {
 		requestBody := bytes.NewBufferString(ConvertMapToRequestParams(parameters, requestType))
 		request, err = http.NewRequest(requestType, url, requestBody)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	}
@@ -76,16 +107,27 @@ func SendRequest(url string, requestType string,
 
 	resp, err = client.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer resp.Body.Close()
 
-	// read the body
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	// Scenario: no destination writer provided; try to read all content, and
+	//
+	if destination == nil {
+		// read the body
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, 0, err
+		}
+		return body, int64(len(body)), nil
 	}
-	return body, nil
+
+	written, err := io.Copy(destination, resp.Body)
+	if err != nil {
+		return nil, written, err
+	}
+	return nil, written, nil
+
 }
 
 // IsTimeoutError returns true if the provided error argument is a standard library
