@@ -74,11 +74,8 @@ func DebugWithInterface(message string, variantObjects ...interface{}) {
 	if currentLogLevel < LOG_LEVEL_DEBUG {
 		return
 	}
-
 	message = "DEBUG: " + message
-
 	log.Printf(message, variantObjects...)
-
 }
 
 func DebugWithInterfaceNoPrefix(message string, variantObjects ...interface{}) {
@@ -91,13 +88,18 @@ func DebugWithInterfaceNoPrefix(message string, variantObjects ...interface{}) {
 }
 
 func Info(message string) {
-
 	if currentLogLevel < LOG_LEVEL_INFO {
 		return
 	}
-
 	log.Println("INFO: " + message)
+}
 
+func Infof(format string, args ...interface{}) {
+	if currentLogLevel < LOG_LEVEL_INFO {
+		return
+	}
+	format = strings.Join([]string{"INFO: ", format}, "")
+	log.Printf(format, args)
 }
 
 func Warn(message string) {
@@ -117,24 +119,31 @@ func Warn(message string) {
 }
 
 func Error(message string, recordedError error) {
-
 	if currentLogLevel < LOG_LEVEL_ERROR {
 		return
 	}
-
 	if useColorsForLogger {
 		message = redColorizer("ERROR: " + message)
 	} else {
 		message = "ERROR: " + message
 	}
-
 	if recordedError != nil {
 		log.Println(message, "\n\r", recordedError)
 		return
 	}
-
 	log.Println(message)
+}
 
+func Errorf(format string, args ...interface{}) {
+	if currentLogLevel < LOG_LEVEL_ERROR {
+		return
+	}
+	msg := fmt.Sprintf(format, args...)
+	fullMsg := strings.Join([]string{"ERROR: ", msg}, "")
+	if useColorsForLogger {
+		fullMsg = redColorizer(fullMsg)
+	}
+	log.Printf(fullMsg)
 }
 
 func ErrorWithInterface(message string, variantObjects ...interface{}) {
