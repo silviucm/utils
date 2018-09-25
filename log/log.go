@@ -3,6 +3,7 @@ package log
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -175,7 +176,11 @@ func FatalErr(message string, recordedError error) {
 	}
 
 	log.Fatal(message)
+}
 
+// Printf behaves like the standard fmt.Printf function. It does not print any log prefix.
+func Printf(format string, args ...interface{}) (int, error) {
+	return fmt.Printf(format, args...)
 }
 
 // Helps track the elapsed time from the beginning to the end of a function.
