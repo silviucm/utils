@@ -3,9 +3,11 @@ package log
 import (
 	"bytes"
 	"errors"
-	"github.com/mgutz/ansi"
 	"log"
+	"strings"
 	"time"
+
+	"github.com/mgutz/ansi"
 )
 
 const (
@@ -41,6 +43,10 @@ func LoggerSetLevel(logLevel int) {
 
 func LoggerUseColors(useColors bool) {
 	useColorsForLogger = useColors
+}
+
+func LoggerSetTargetFile(filePath string) {
+
 }
 
 func Debug(message string) {
@@ -147,9 +153,12 @@ func ErrorWithInterface(message string, variantObjects ...interface{}) {
 }
 
 func Fatal(message string) {
-
 	log.Fatal("FATAL: " + message)
+}
 
+func Fatalf(format string, args ...interface{}) {
+	format = strings.Join([]string{"FATAL: ", format}, "")
+	log.Fatalf(format, args...)
 }
 
 func FatalErr(message string, recordedError error) {
@@ -161,7 +170,7 @@ func FatalErr(message string, recordedError error) {
 	}
 
 	if recordedError != nil {
-		log.Fatal(message, "\n\r", recordedError)
+		log.Fatal(message, ": ", recordedError.Error())
 		return
 	}
 
